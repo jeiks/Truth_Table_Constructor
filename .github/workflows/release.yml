@@ -1,0 +1,37 @@
+name: Generate automatic release
+
+on:
+  push:
+    tags:
+      - 'v*' # start the process when a tag "v" is created (Ex: v1.0.0)
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Download repository code
+      uses: actions/checkout@v4
+
+    - name: Configure Java JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Build JAR file
+      run: |
+        chmod +x build.sh
+        ./build.sh
+
+    - name: Build GitHub Release and attache JAR file
+      uses: softprops/action-gh-release@v2
+      with:
+        files: TruthTable.jar
+        name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
